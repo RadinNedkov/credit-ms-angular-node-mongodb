@@ -1,2 +1,2 @@
-# credit-ms-service-node-express-mongodb
+# credit-ms-service
 Credit Management system with Node.js, Express, MongoDB and Mongoose
