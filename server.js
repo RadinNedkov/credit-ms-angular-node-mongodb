@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
-const routes = require('../routes/routes');
+const routes = require('#routes/routes');
 
 const app = express();
 
@@ -23,6 +23,6 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/api', routes)
 
-app.listen(3000, () => {
-    console.log(`Server Started at ${3000}`)
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server Started at ${process.env.PORT}`)
 })

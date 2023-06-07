@@ -1,5 +1,5 @@
 const express = require('express');
-const Model = require('../models/model');
+const Model = require('#models/model');
 
 const router = express.Router()
 
@@ -11,8 +11,8 @@ router.post('/post', async(req, res) => {
     })
 
     try {
-        const dataToSave = data.save();
-        res.status(200).json(data)
+        data.save();
+        res.status(200).json('Person successfully added with id: ' + data._id)
     } catch (error) {
         res.status(400).json({ message: error.message })
     }
