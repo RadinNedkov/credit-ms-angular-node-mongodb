@@ -11,7 +11,7 @@ const getTotalAmount = (arrayOfObjects) => {
     return sum
 }
 
-router.post('/credits', async (req, res) => {
+router.post('/credits', async(req, res) => {
     const data = new Credit({
         customerName: req.body.customerName,
         amount: req.body.amount,
@@ -20,21 +20,23 @@ router.post('/credits', async (req, res) => {
         totalDue: req.body.amount
     })
 
-    const credits = await Credit.find()
+    const credits = await Credit.find({ customerName: req.body.customerName })
         .select('amount')
         .exec()
-    const totalAmount = getTotalAmount(credits)
-    if ((totalAmount + data.amount) > CONSTANTS.CREDIT_LIMIT) {
-        return res.status(400).json({error: `Your credit limit is ${CONSTANTS.CREDIT_LIMIT} BGN and the requested amount can't be approved.`})
+    if (credits.length > 0) {
+        const totalAmount = getTotalAmount(credits)
+        if ((totalAmount + data.amount) > CONSTANTS.CREDIT_LIMIT) {
+            return res.status(400).json({ error: `Your credit limit is ${CONSTANTS.CREDIT_LIMIT} BGN and the requested amount can't be approved.` })
+        }
     }
 
     data.save()
-    .then(result => {
-        res.status(200).json('Credit successfully created with id: ' + result._id)
-    })
-    .catch (error => {
-        res.status(400).json({ error: error.message })
-    })
+        .then(result => {
+            res.status(200).json('Credit successfully created with id: ' + result._id)
+        })
+        .catch(error => {
+            res.status(400).json({ error: error.message })
+        })
 })
 
 router.get('/credits', (req, res) => {
@@ -48,7 +50,7 @@ router.get('/credits', (req, res) => {
             }
             res.status(200).json(response)
         })
-        .catch (error => {
+        .catch(error => {
             res.status(500).json({ error: error.message })
         })
 })
@@ -60,43 +62,44 @@ router.get('/credits/:id', (req, res) => {
         .then(data => {
             res.status(200).json(data)
         })
-        .catch (error => {
+        .catch(error => {
             res.status(500).json({ message: error.message })
         })
 })
 
-router.patch('/credits/update/:id/:payment', async (req, res) => {
+router.patch('/credits/update/:id', async(req, res) => {
     const id = req.params.id
+    const payment = req.body.payment
     let notification = ''
     const options = { new: true }
     const credit = await Credit.findById(req.params.id)
         .exec()
 
-    if (req.params.payment > credit.totalDue) {
+    if (payment > credit.totalDue) {
+        notification = `You have an overpayment of ${payment - credit.totalDue} BGN, which is refunded!`
         credit.totalDue = 0
-        notification = `You have an overpayment of ${req.params.payment - credit.totalDue} BGN, which is refunded!`
     } else {
-        credit.totalDue -= req.params.payment
+        credit.totalDue -= payment
     }
 
     Credit.findByIdAndUpdate(
-        id, credit, options
-    )
-    .then(data => {
-        res.status(200).json({credit: data, message: notification })
-    })
-    .catch (error => {
-        res.status(500).json({ message: error.message })
-    })
+            id, credit, options
+        )
+        .then(data => {
+            res.status(200).json({ credit: data, message: notification })
+        })
+        .catch(error => {
+            res.status(500).json({ message: error.message })
+        })
 })
 
 router.delete('/credits/delete/:id', (req, res) => {
     const id = req.params.id;
-        Credit.findByIdAndDelete(id)
+    Credit.findByIdAndDelete(id)
         .then(data => {
             res.send(`Credit ${data._id} has been deleted..`)
         })
-        .catch (error => {
+        .catch(error => {
             res.status(500).json({ message: error.message })
         })
 })
