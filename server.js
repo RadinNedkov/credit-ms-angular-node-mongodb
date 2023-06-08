@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
-const routes = require('#routes/routes');
+const creditRoutes = require('#routes/credits');
 
 const app = express();
 
@@ -21,7 +21,7 @@ database.once('connected', () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use('/api', routes)
+app.use('/api', creditRoutes)
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server Started at ${process.env.PORT}`)
